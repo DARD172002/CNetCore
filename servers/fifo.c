@@ -10,11 +10,12 @@
 #include <fcntl.h>
 #include <signal.h>
 #include <dirent.h>
+#include <asm-generic/socket.h>
 
-#define PORT 8080
-#define BUFFER_SIZE 1024
-#define ROOT_DIR "./www"
-
+#define PORT 8080 //Port define for listen
+#define BUFFER_SIZE 1024 // size of buffer
+#define ROOT_DIR "./www" //Directory where the files shared are located
+ 
 int server_fd;
 
 void handle_signal(int sig) {
@@ -105,7 +106,7 @@ void handle_client(int client_socket) {
         }
     }
 
-    // Open the file
+    // Open the file rb mean read binary
     FILE *file = fopen(file_path, "rb");
     if (!file) {
         send_error_response(client_socket, "404 Not Found", "The requested file was not found");
@@ -113,7 +114,6 @@ void handle_client(int client_socket) {
         return;
     }
 
-    // Determine content type based on file extension
     const char *content_type = "text/plain";
     if (strstr(path, ".html")) content_type = "text/html";
     else if (strstr(path, ".css")) content_type = "text/css";
@@ -166,7 +166,7 @@ int main() {
     address.sin_addr.s_addr = INADDR_ANY;
     address.sin_port = htons(PORT);
 
-    // Bind socket to port
+   
     if (bind(server_fd, (struct sockaddr *)&address, sizeof(address)) < 0) {
         perror("bind failed");
         exit(EXIT_FAILURE);
@@ -193,7 +193,7 @@ int main() {
     // Set up signal handler for graceful shutdown
     signal(SIGINT, handle_signal);
 
-    // Main server loop
+   
     while (1) {
         int client_socket;
         if ((client_socket = accept(server_fd, (struct sockaddr *)&address, (socklen_t*)&addrlen)) < 0) {
