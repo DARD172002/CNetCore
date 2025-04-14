@@ -32,33 +32,47 @@ void download_file(const char *filename) {
     struct sockaddr_in serv_addr;
     char buffer[BUFFER_SIZE] = {0};
     
-    // this part create the socket
+    // Crear socket
     if ((sock = socket(AF_INET, SOCK_STREAM, 0)) < 0) {
         perror("socket creation failed");
         exit(EXIT_FAILURE);
     }
     
-    serv_addr.sin_family = AF_INET;// this tell us working with IPv4
+    serv_addr.sin_family = AF_INET;
     serv_addr.sin_port = htons(SERVER_PORT);
     
-    // Convert IPv4 address from text to binary form
     if (inet_pton(AF_INET, SERVER_IP, &serv_addr.sin_addr) <= 0) {
         perror("invalid address");
         exit(EXIT_FAILURE);
     }
     
-    // Connect to server
     if (connect(sock, (struct sockaddr *)&serv_addr, sizeof(serv_addr)) < 0) {
         perror("connection failed");
         exit(EXIT_FAILURE);
     }
     
-    // Send HTTP GET request
+    // Enviar solicitud GET
     char request[BUFFER_SIZE];
-    snprintf(request, BUFFER_SIZE, "GET /%s HTTP/1.1\r\nHost: %s\r\n\r\n", filename, SERVER_IP);
+    snprintf(request, BUFFER_SIZE, "GET /%s HTTP/1.1\r\nHost: %s\r\nConnection: close\r\n\r\n", filename, SERVER_IP);
     send(sock, request, strlen(request), 0);
     
-    // Create file to save the downloaded content
+    // Leer respuesta inicial (cabecera)
+    int bytes_received = recv(sock, buffer, BUFFER_SIZE - 1, 0);
+    if (bytes_received <= 0) {
+        perror("failed to receive response");
+        close(sock);
+        return;
+    }
+    buffer[bytes_received] = '\0';
+
+    // Verificar si es 404
+    if (strstr(buffer, "404 Not Found")) {
+        printf("Error: El archivo \"%s\" no fue encontrado en el servidor.\n", filename);
+        close(sock);
+        return;
+    }
+
+    // Crear ruta para guardar archivo
     char filepath[256];
     snprintf(filepath, sizeof(filepath), "%s/%s", DOWNLOAD_DIR, filename);
     
@@ -68,26 +82,25 @@ void download_file(const char *filename) {
         close(sock);
         exit(EXIT_FAILURE);
     }
-    
-    // Read response and save to file
-    int bytes_received;
-    int header_ended = 0;
-    while ((bytes_received = recv(sock, buffer, BUFFER_SIZE, 0)) > 0) {
-        if (!header_ended) {
-            // Check for end of headers (empty line)
-            char *header_end = strstr(buffer, "\r\n\r\n");
-            if (header_end) {
-                header_ended = 1;
-                fwrite(header_end + 4, 1, bytes_received - (header_end - buffer) - 4, file);
-            }
-        } else {
-            fwrite(buffer, 1, bytes_received, file);
+
+    // Buscar fin de cabecera y escribir solo el contenido
+    char *header_end = strstr(buffer, "\r\n\r\n");
+    if (header_end) {
+        int body_offset = (header_end - buffer) + 4;
+        int body_length = bytes_received - body_offset;
+        if (body_length > 0) {
+            fwrite(buffer + body_offset, 1, body_length, file);
         }
     }
-    
+
+    // Leer y escribir el resto del cuerpo
+    while ((bytes_received = recv(sock, buffer, BUFFER_SIZE, 0)) > 0) {
+        fwrite(buffer, 1, bytes_received, file);
+    }
+
     fclose(file);
     close(sock);
-    printf("File downloaded successfully: %s\n", filepath);
+    printf("Archivo descargado correctamente: %s\n", filepath);
 }
 
 int main(int argc, char *argv[]) {
