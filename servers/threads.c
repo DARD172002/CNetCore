@@ -9,7 +9,7 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 
-#define PORT 8080
+#define PORT 8082
 #define BUFFER_SIZE 65536
 #define FILES_DIR "./files"
 
