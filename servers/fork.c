@@ -13,8 +13,8 @@
 #include <asm-generic/socket.h>
 
 #define PORT 8081
-#define BUFFER_SIZE 1024
-#define ROOT_DIR "./www"
+#define BUFFER_SIZE 65536
+#define ROOT_DIR "./files"
 
 int server_fd;
 
