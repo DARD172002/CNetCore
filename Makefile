@@ -6,7 +6,7 @@ all: servers/fifo client/client servers/fork servers/threads
 
 
 servers/fifo: servers/fifo.c
-	$(GCC) $(FLAGS) servers/fifo.c -o servers/fifo
+	$(GCC) $(FLAGS) servers/fifo.c -o servers/fifo -lpthread
 
 client/client: client/client.c
 	$(GCC) $(FLAGS) client/client.c -o client/client -lpthread
@@ -48,4 +48,4 @@ test-client:
 
 
 clean:
-	rm -f servers/*.o client/*.o servers/fifo client/client
+	rm -f servers/*.o client/*.o servers/fifo client/client servers/fork servers/threads
