@@ -17,7 +17,7 @@
 //This fucntion create the directory for download files
 void create_download_dir(int server_port) {
     // if directory exist it does not create, but otherwise create the directory
-    printf("the port number is %d",server_port);
+    printf("El puerto es %d ",server_port);
     struct stat st = {0};
     if (stat(DOWNLOAD_DIR, &st) == -1) {
         if (mkdir(DOWNLOAD_DIR, 0777) == -1) {
@@ -116,7 +116,7 @@ int main(int argc, char *argv[]) {
     create_download_dir(server_port);
     
     for (int i = 2; i < argc; i++) {
-        printf("Downloading file: %s\n", argv[i]);
+        printf("Descargando archivo: %s\n", argv[i]);
         download_file(argv[i],server_port);
     }
     

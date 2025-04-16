@@ -1,6 +1,6 @@
 GCC = gcc
 FLAGS = -Wall
-FILES = www
+FILES = servers/files
 
 all: servers/fifo client/client servers/fork servers/threads
 
