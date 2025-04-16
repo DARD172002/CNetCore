@@ -13,8 +13,8 @@
 #include <asm-generic/socket.h>
 
 #define PORT 8080 //Port define for listen
-#define BUFFER_SIZE 1024 // size of buffer
-#define ROOT_DIR "./www" //Directory where the files shared are located
+#define BUFFER_SIZE 65536 // size of buffer
+#define ROOT_DIR "./files" //Directory where the files shared are located
  
 int server_fd;
 
