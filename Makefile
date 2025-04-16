@@ -1,6 +1,6 @@
 GCC = gcc
 FLAGS = -Wall
-FILES = servers/files
+FILES = files
 
 all: servers/fifo client/client servers/fork servers/threads
 
@@ -37,13 +37,14 @@ test-files:
 
 # Test a single server
 test-server: servers/fifo servers/fork servers/threads
-	./servers/fifo
-	./servers/fork
-	./servers/threads
+	./servers/fifo &
+	./servers/fork &
+	./servers/threads &
 
 test-client:
 	./client/client Hi.txt
 	.
+
 
 
 
