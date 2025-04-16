@@ -10,8 +10,9 @@
 #include <fcntl.h>
 #include <signal.h>
 #include <dirent.h>
+#include <asm-generic/socket.h>
 
-#define PORT 8080
+#define PORT 8081
 #define BUFFER_SIZE 1024
 #define ROOT_DIR "./www"
 

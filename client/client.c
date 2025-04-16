@@ -9,14 +9,15 @@
 #include <sys/stat.h>  // For mkdir()
 #include <fcntl.h>
 #include <errno.h>
+#define SERVER_PORT 8080
 
 #define SERVER_IP "127.0.0.1"
-#define SERVER_PORT 8080
-#define BUFFER_SIZE 1024
+#define BUFFER_SIZE 65536
 #define DOWNLOAD_DIR "./downloads"
 //This fucntion create the directory for download files
-void create_download_dir() {
+void create_download_dir(int server_port) {
     // if directory exist it does not create, but otherwise create the directory
+    printf("the port number is %d",server_port);
     struct stat st = {0};
     if (stat(DOWNLOAD_DIR, &st) == -1) {
         if (mkdir(DOWNLOAD_DIR, 0777) == -1) {
@@ -27,7 +28,7 @@ void create_download_dir() {
     }
 }
 
-void download_file(const char *filename) {
+void download_file(const char *filename, int server_port) {
     int sock = 0;
     struct sockaddr_in serv_addr;
     char buffer[BUFFER_SIZE] = {0};
@@ -39,7 +40,7 @@ void download_file(const char *filename) {
     }
     
     serv_addr.sin_family = AF_INET;
-    serv_addr.sin_port = htons(SERVER_PORT);
+    serv_addr.sin_port = htons(server_port);
     
     if (inet_pton(AF_INET, SERVER_IP, &serv_addr.sin_addr) <= 0) {
         perror("invalid address");
@@ -109,11 +110,14 @@ int main(int argc, char *argv[]) {
         return EXIT_FAILURE;
     }
     
-    create_download_dir();
+    int server_port= atoi(argv[1]);
+
     
-    for (int i = 1; i < argc; i++) {
+    create_download_dir(server_port);
+    
+    for (int i = 2; i < argc; i++) {
         printf("Downloading file: %s\n", argv[i]);
-        download_file(argv[i]);
+        download_file(argv[i],server_port);
     }
     
     return EXIT_SUCCESS;
